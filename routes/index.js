@@ -76,7 +76,7 @@ router.post("/login", (req, res) => {
 
 router.post("/logout", validateToken, (req, res) => {
   console.log("wylgoggowywuje");
-  res.json(200, { message: "Wylogowywanie" });
+  res.json(200, { message: "Zostałeś/aś poprawnie wylogowany/na" });
 });
 
 router.post("/session", validateToken, (req, res) => {
