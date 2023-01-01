@@ -80,6 +80,7 @@ router.post("/logout", validateToken, (req, res) => {
 });
 
 router.post("/session", validateToken, (req, res) => {
+  console.log("sprawdzam sesje");
   const accessToken = req.headers["x-access-token"];
   const token = verify(accessToken, config.JWT_SECRET);
 
