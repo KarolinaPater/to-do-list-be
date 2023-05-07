@@ -2,25 +2,53 @@ const express = require("express");
 const router = express.Router();
 const sha512 = require("js-sha512");
 const config = require("../config");
+const Article = require("../models/article");
 const { verify } = require("jsonwebtoken");
 const { createTokens, validateToken } = require("../JWT");
-
 const User = require("../models/user");
 
-router.get("/", function (req, res, next) {
-  res.json({ title: "uzytkownik" });
+router.get("/article", (req, res) => {
+  console.log("pobiera artykuly");
+  articleList = Article.find();
+  articleList.sort({ date: -1 });
+  articleList.exec((err, articleList) => {
+    if (err) {
+      console.log("error skad blad", err);
+      res.json(400, { err });
+    }
+    if (!articleList) {
+      console.log("brak artykulow");
+      res.json(200, { message: "Brak artykułów" });
+    }
+    res.json(200, { articleList });
+  });
+});
+
+router.get("/get-article/:id", (req, res) => {
+  const { id } = req.params;
+  console.log("pobieram 1 artyukl po id:", id);
+  const article = Article.findOne({
+    _id: id,
+  }).then((article) => {
+    if (!article) {
+      res.json(400, { message: "Error Brak artykułu" });
+    } else {
+      res.json(200, { article });
+    }
+  });
 });
 
 router.post("/register", (req, res) => {
-  const { name, last_name, email, password } = req.body;
+  const { name, last_name, email, password, orcid_number, affiliation } =
+    req.body;
 
   if (!name || !last_name || !email || !password) {
-    res.json(400, { message: "Prosze uzupełnić wymagane pola" });
+    res.json(400, { message: "Proszę uzupełnić wymagane pola" });
   }
   if (password.length < 8)
-    res.json(400, { message: "Hasło musi sie składać z minimum 8 znaków" });
-  if (email.length > 250)
-    res.json(400, { message: "Email może zawierac maksymalnie 60 znaków" });
+    res.json(400, { message: "Hasło musi się składać z minimum 8 znaków" });
+  if (email.length > 30)
+    res.json(400, { message: "Email może zawierać maksymalnie 30 znaków" });
 
   User.findOne({ email: email }).then((user) => {
     if (user) {
@@ -31,6 +59,8 @@ router.post("/register", (req, res) => {
         last_name,
         email: email.toLowerCase(),
         password,
+        orcid_number,
+        affiliation,
       });
       newUser.password = sha512(newUser.password);
       newUser
@@ -48,11 +78,9 @@ router.post("/register", (req, res) => {
 router.post("/login", (req, res) => {
   const { email, password } = req.body;
   const hashpassword = sha512(password);
-
-  if (!email) res.json(400, { message: "Prosze uzupełnić email" });
-  if (!password) res.json(400, { message: "Prosze uzupełnić hasło" });
-
-  const user = User.findOne({
+  if (!email || !password)
+    res.json(400, { message: "Proszę uzupełnić wymagane pola" });
+  User.findOne({
     email: email.toLowerCase(),
     password: hashpassword,
   }).then((user) => {
@@ -68,6 +96,7 @@ router.post("/login", (req, res) => {
           name: user.name,
           last_name: user.last_name,
           email: user.email,
+          role: user.role,
         },
       });
     }
@@ -83,13 +112,12 @@ router.post("/session", validateToken, (req, res) => {
   console.log("sprawdzam sesje");
   const accessToken = req.headers["x-access-token"];
   const token = verify(accessToken, config.JWT_SECRET);
-
   const user = User.findOne({
-    email: token.email.toLowerCase(),
-    _id: token.id,
+    email: token?.email?.toLowerCase(),
+    _id: token?.id,
   }).then((user) => {
     if (!user) {
-      res.json(400, { message: "Niewłasciwy email lub id" });
+      res.json(400, { message: "Brak użytkownika" });
     } else {
       const accessToken = createTokens(user);
       res.json(200, {
@@ -100,6 +128,7 @@ router.post("/session", validateToken, (req, res) => {
           name: user.name,
           last_name: user.last_name,
           email: user.email,
+          role: user.role,
         },
       });
     }

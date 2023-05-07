@@ -18,6 +18,14 @@ const userSchema = new Schema({
     type: String,
     require: true,
   },
+  orcid_number: {
+    type: String,
+    require: false,
+  },
+  affiliation: {
+    type: String,
+    require: false,
+  },
   role: {
     type: String,
     default: "user",

@@ -12,8 +12,7 @@ router.get("/", function (req, res, next) {
 
 module.exports = router;
 
-router.put("/edit-article", (req, res) => {
-  console.log("konsollog w edit article");
+router.put("/edit-article", validateToken, (req, res) => {
   //sciagam tokena z headera
   const accessToken = req.headers["x-access-token"];
   const token = verify(accessToken, config.JWT_SECRET);
@@ -69,12 +68,13 @@ router.put("/edit-article", (req, res) => {
   });
 });
 
-router.post("/add-article", (req, res) => {
+router.post("/add-article", validateToken, (req, res) => {
   //sciagam tokena z headera
   const accessToken = req.headers["x-access-token"];
   const token = verify(accessToken, config.JWT_SECRET);
 
-  const { doi_number, article_theme, authors, sources, summary } = req.body;
+  const { doi_number, article_theme, authors, sources, summary, image } =
+    req.body;
   //jesli doi number jest czymkolwiek wtedy
 
   if (!doi_number || !article_theme || !authors || !sources || !summary) {
@@ -103,10 +103,8 @@ router.post("/add-article", (req, res) => {
     sources: sources,
     summary: summary,
     user: token.id,
+    image: image,
   });
-  //############################################################
-  //TODO doac usera do artykuly i obs;luzyc blad i sukces dodania
-  // newArticle.save;
 
   newArticle.save((err) => {
     if (!err) {
@@ -119,9 +117,7 @@ router.post("/add-article", (req, res) => {
   });
 });
 
-//POBIERZ LISTE ARTYKULOW
-
-router.get("/get-article-list", (req, res) => {
+router.get("/get-article-list", validateToken, (req, res) => {
   const accessToken = req.headers["x-access-token"];
   const token = verify(accessToken, config.JWT_SECRET);
 
@@ -141,7 +137,7 @@ router.get("/get-article-list", (req, res) => {
 });
 
 //POBIERZ JEDEN ARTYKUL
-router.get("/get-article/:id", (req, res) => {
+router.get("/get-article/:id", validateToken, (req, res) => {
   const accessToken = req.headers["x-access-token"];
   const token = verify(accessToken, config.JWT_SECRET);
   const { id } = req.params;
