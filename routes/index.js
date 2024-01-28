@@ -2,51 +2,50 @@ const express = require("express");
 const router = express.Router();
 const sha512 = require("js-sha512");
 const config = require("../config");
-const Article = require("../models/article");
+const Product = require("../models/product");
 const { verify } = require("jsonwebtoken");
 const { createTokens, validateToken } = require("../JWT");
 const User = require("../models/user");
 
-router.get("/article", (req, res) => {
-  console.log("pobiera artykuly");
-  articleList = Article.find();
-  articleList.sort({ date: -1 });
-  articleList.exec((err, articleList) => {
+router.get("/my-product", (req, res) => {
+  console.log("pobiera produkty");
+  productList = Product.find();
+  productList.sort({ date: -1 });
+  productList.exec((err, productList) => {
     if (err) {
       console.log("error skad blad", err);
       res.json(400, { err });
     }
-    if (!articleList) {
-      console.log("brak artykulow");
-      res.json(200, { message: "Brak artykułów" });
+    if (!productListList) {
+      console.log("brak produktów");
+      res.json(200, { message: "Brak produktów" });
     }
-    res.json(200, { articleList });
+    res.json(200, { productListList });
   });
 });
 
-router.get("/get-article/:id", (req, res) => {
+router.get("/get-product/:id", (req, res) => {
   const { id } = req.params;
-  console.log("pobieram 1 artyukl po id:", id);
-  const article = Article.findOne({
+  console.log("pobieram 1 produkt po id:", id);
+  const product = Product.findOne({
     _id: id,
-  }).then((article) => {
-    if (!article) {
-      res.json(400, { message: "Error Brak artykułu" });
+  }).then((product) => {
+    if (!product) {
+      res.json(400, { message: "Error Brak produktu" });
     } else {
-      res.json(200, { article });
+      res.json(200, { product });
     }
   });
 });
 
 router.post("/register", (req, res) => {
-  const { name, last_name, email, password, orcid_number, affiliation } =
-    req.body;
+  const { name, email, password } = req.body;
 
-  if (!name || !last_name || !email || !password) {
+  if (!name || !email || !password) {
     res.json(400, { message: "Proszę uzupełnić wymagane pola" });
   }
-  if (password.length < 8)
-    res.json(400, { message: "Hasło musi się składać z minimum 8 znaków" });
+  if (password.length < 6)
+    res.json(400, { message: "Hasło musi się składać z minimum 5 znaków" });
   if (email.length > 30)
     res.json(400, { message: "Email może zawierać maksymalnie 30 znaków" });
 
@@ -56,11 +55,8 @@ router.post("/register", (req, res) => {
     } else {
       const newUser = new User({
         name,
-        last_name,
         email: email.toLowerCase(),
         password,
-        orcid_number,
-        affiliation,
       });
       newUser.password = sha512(newUser.password);
       newUser
@@ -76,6 +72,7 @@ router.post("/register", (req, res) => {
 });
 
 router.post("/login", (req, res) => {
+  console.log("hello world", req.body);
   const { email, password } = req.body;
   const hashpassword = sha512(password);
   if (!email || !password)
@@ -94,7 +91,6 @@ router.post("/login", (req, res) => {
         accessToken,
         user: {
           name: user.name,
-          last_name: user.last_name,
           email: user.email,
           role: user.role,
         },
@@ -104,7 +100,6 @@ router.post("/login", (req, res) => {
 });
 
 router.post("/logout", validateToken, (req, res) => {
-  console.log("wylgoggowywuje");
   res.json(200, { message: "Zostałeś/aś poprawnie wylogowany/na" });
 });
 
@@ -126,7 +121,6 @@ router.post("/session", validateToken, (req, res) => {
         accessToken,
         user: {
           name: user.name,
-          last_name: user.last_name,
           email: user.email,
           role: user.role,
         },

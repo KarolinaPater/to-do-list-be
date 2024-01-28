@@ -1,7 +1,7 @@
 var express = require("express");
 var router = express.Router();
 const User = require("../models/user");
-const Article = require("../models/article");
+const Product = require("../models/product");
 const config = require("../config");
 const { verify } = require("jsonwebtoken");
 const { createTokens, validateToken } = require("../JWT");
@@ -19,35 +19,25 @@ router.put("/edit-user/:id", validateToken, (req, res) => {
   const { id } = req.params;
   // const accessToken = req.headers["x-access-token"];
   // const token = verify(accessToken, config.JWT_SECRET);
-  const { name, last_name, email, orcid_number, affiliation } = req.body;
+  const { name, email } = req.body;
   //jesli doi number jest czymkolwiek wtedy
   if (!id) {
     res.json(400, { message: "Błąd brak id usera?" });
   }
-  if (!name || !last_name || !email) {
+  if (!name || !email) {
     res.json(400, { message: "Proszę uzupełnić wszystkie pola" });
   }
   if (name.length < 2) {
-    res.json(400, { message: "Imię jest za krótkie" });
+    res.json(400, { message: "Nazwa jest za krótka" });
   }
-  if (last_name.length < 3) {
-    res.json(400, { message: "Nazwisko jest za krótkie" });
-  }
+
   if (email.length < 5) {
     res.json(400, { message: "Email jest za krótki" });
   }
 
   const editUser = User.findByIdAndUpdate(
     { _id: id },
-    {
-      name: name,
-      last_name: last_name,
-      email: email,
-      orcid_number: orcid_number,
-      affiliation: affiliation,
-      creation_date: undefined,
-      editDate: Date.now(),
-    }
+    { name: name, email: email, creation_date: undefined, editDate: Date.now() }
   );
   editUser.exec((err, editUser) => {
     if (err) {
@@ -100,18 +90,14 @@ router.get("/get-user/:id", validateToken, (req, res) => {
     } else {
       const selectedUser = {
         name: user?.name || "",
-        last_name: user?.last_name || "",
         email: user?.email || "",
-        orcid_number: user?.orcid_number || "",
-        affiliation: user?.affiliation || "",
       };
       res.json(200, { user: selectedUser });
     }
   });
 });
 
-router.put("/edit-article", validateToken, (req, res) => {
-  console.log("konsollog w edit article");
+router.put("/edit-product", validateToken, (req, res) => {
   //sciagam tokena z headera
   const accessToken = req.headers["x-access-token"];
   const token = verify(accessToken, config.JWT_SECRET);
@@ -119,57 +105,70 @@ router.put("/edit-article", validateToken, (req, res) => {
     res.json(400, { message: "Brak uprawnień" });
   }
 
-  const { _id, doi_number, article_theme, authors, sources, summary } =
-    req.body;
-  //jesli doi number jest czymkolwiek wtedy
+  const {
+    _id,
+    brand,
+    main_category,
+    secondary_category,
+    product_short_name,
+    product_description,
+    product_capacity,
+    unit_of_capacity,
+    starting_date,
+    endind_date,
+    period_after_opening,
+    expiration_date,
+    final_expiration_date,
+    product_price,
+  } = req.body;
+
   if (!_id) {
-    res.json(400, { message: "Błąd brak id artykułu?" });
+    res.json(400, { message: "Błąd brak id produktu?" });
   }
-  if (!doi_number || !article_theme || !authors || !sources || !summary) {
+  if (!brand || !main_category || !secondary_category || !product_short_name) {
     res.json(400, { message: "Proszę uzupełnić wszystkie pola" });
   }
-  if (doi_number.length < 3) {
-    res.json(400, { message: "Numer doi jest za krótki" });
+  if (brand.length < 1) {
+    res.json(400, { message: "Nazwa producenta jest za krótka" });
   }
-  if (article_theme.length < 3) {
-    res.json(400, { message: "Tytul artykułu jest za krótki" });
-  }
-  if (authors.length < 3) {
-    res.json(400, { message: "Pole autorzy jest za krótkie" });
-  }
-  if (sources.length < 3) {
-    res.json(400, { message: "Pole zasoby jest za krótkie" });
-  }
-  if (summary.length < 3) {
-    res.json(400, { message: "Pole podsumowanie jest za krótkie" });
+  if (product_short_name.length < 3) {
+    res.json(400, { message: "Nazwa produktu jest za krótka" });
   }
 
-  const editArticle = Article.findByIdAndUpdate(
+  const editProduct = Product.findByIdAndUpdate(
     {
       _id: _id,
     },
     {
-      doi_number: doi_number,
-      article_theme: article_theme,
-      authors: authors,
-      sources: sources,
-      summary: summary,
+      brand: brand,
+      main_category: main_category,
+      secondary_category: secondary_category,
+      product_short_name: product_short_name,
+      product_description: product_description,
+      product_capacity: product_capacity,
+      unit_of_capacity: unit_of_capacity,
+      starting_date: starting_date,
+      endind_date: endind_date,
+      period_after_opening: period_after_opening,
+      expiration_date: expiration_date,
+      final_expiration_date: final_expiration_date,
+      product_price: product_price,
       editDate: Date.now(),
     }
   );
-  editArticle.exec((err, editArticle) => {
+  editProduct.exec((err, editProduct) => {
     if (err) {
       console.log("błąd serwera", err);
       res.json(400, { message: "Błąd serwera" });
     }
-    if (!editArticle) {
-      res.json(400, { message: "Nie ma takiego artykułu" });
+    if (!editProduct) {
+      res.json(400, { message: "Nie ma takiego produktu" });
     }
-    res.json(200, { message: "Artykuł został pomyślnie zedytowany" });
+    res.json(200, { message: "Produkt został pomyślnie zedytowany" });
   });
 });
 
-router.get("/get-article-list/:id", validateToken, (req, res) => {
+router.get("/get-product-list/:id", validateToken, (req, res) => {
   const accessToken = req.headers["x-access-token"];
   const token = verify(accessToken, config.JWT_SECRET);
   if (token.role !== "admin") {
@@ -177,22 +176,22 @@ router.get("/get-article-list/:id", validateToken, (req, res) => {
   }
   const { id } = req.params;
 
-  articleList = Article.find({
+  productList = Product.find({
     user: id,
   });
-  articleList.sort({ date: -1 });
-  articleList.exec((err, articleList) => {
+  productList.sort({ date: -1 });
+  productListList.exec((err, productList) => {
     if (err) {
       res.json(400, err);
     }
-    if (!articleList) {
-      res.json({ message: "Brak artykułów" });
+    if (!productListList) {
+      res.json({ message: "Brak produktów" });
     }
-    res.json({ articleList });
+    res.json({ productListList });
   });
 });
 
-router.delete("/delete-user-article/:id", validateToken, (req, res) => {
+router.delete("/delete-user-product/:id", validateToken, (req, res) => {
   const accessToken = req.headers["x-access-token"];
   const token = verify(accessToken, config.JWT_SECRET);
   if (token.role !== "admin") {
@@ -200,15 +199,15 @@ router.delete("/delete-user-article/:id", validateToken, (req, res) => {
   }
   const { id } = req.params;
   console.log("błąd 1");
-  const article = Article.findByIdAndDelete({
+  const product = Product.findByIdAndDelete({
     _id: id,
-  }).then((article) => {
-    if (!article) {
+  }).then((product) => {
+    if (!product) {
       console.log("błąd 2");
-      res.json(400, { message: "Brak artykułu do usuniecia" });
+      res.json(400, { message: "Brak produktu do usuniecia" });
     } else {
       console.log("błąd 3");
-      res.json(200, { message: "Artykuł został pomyślnie usunięty" });
+      res.json(200, { message: "Produkt został pomyślnie usunięty" });
     }
   });
 });
