@@ -11,16 +11,14 @@ module.exports = router;
 router.put("/edit-user/:id", validateToken, (req, res) => {
   const accessToken = req.headers["x-access-token"];
   const token = verify(accessToken, config.JWT_SECRET);
-  console.log(token.role, token);
+
   if (token.role !== "admin") {
     res.json(400, { message: "Brak uprawnień" });
   }
-  //sciagam tokena z headera
   const { id } = req.params;
-  // const accessToken = req.headers["x-access-token"];
-  // const token = verify(accessToken, config.JWT_SECRET);
+
   const { name, email } = req.body;
-  //jesli doi number jest czymkolwiek wtedy
+
   if (!id) {
     res.json(400, { message: "Błąd brak id usera?" });
   }
@@ -41,14 +39,12 @@ router.put("/edit-user/:id", validateToken, (req, res) => {
   );
   editUser.exec((err, editUser) => {
     if (err) {
-      console.log("błąd serwera", err);
       res.json(400, { message: "Błąd serwera" });
     }
     if (!editUser) {
-      console.log("błąd serwera", err);
       res.json(400, { message: "Nie ma takiego użytkownika" });
     }
-    console.log("błąd serwera", err);
+
     res.json(200, { message: "Edycja się powiodła" });
   });
 });
@@ -73,7 +69,6 @@ router.get("/get-user-list", validateToken, (req, res) => {
   });
 });
 
-//POBIERZ JEDEN usera
 router.get("/get-user/:id", validateToken, (req, res) => {
   const accessToken = req.headers["x-access-token"];
   const token = verify(accessToken, config.JWT_SECRET);
@@ -98,7 +93,6 @@ router.get("/get-user/:id", validateToken, (req, res) => {
 });
 
 router.put("/edit-product", validateToken, (req, res) => {
-  //sciagam tokena z headera
   const accessToken = req.headers["x-access-token"];
   const token = verify(accessToken, config.JWT_SECRET);
   if (token.role !== "admin") {
@@ -158,7 +152,6 @@ router.put("/edit-product", validateToken, (req, res) => {
   );
   editProduct.exec((err, editProduct) => {
     if (err) {
-      console.log("błąd serwera", err);
       res.json(400, { message: "Błąd serwera" });
     }
     if (!editProduct) {
@@ -198,15 +191,13 @@ router.delete("/delete-user-product/:id", validateToken, (req, res) => {
     res.json(400, { message: "Brak uprawnień" });
   }
   const { id } = req.params;
-  console.log("błąd 1");
+
   const product = Product.findByIdAndDelete({
     _id: id,
   }).then((product) => {
     if (!product) {
-      console.log("błąd 2");
       res.json(400, { message: "Brak produktu do usuniecia" });
     } else {
-      console.log("błąd 3");
       res.json(200, { message: "Produkt został pomyślnie usunięty" });
     }
   });

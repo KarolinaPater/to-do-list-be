@@ -30,8 +30,8 @@ const userSchema = new Schema({
   },
 });
 
-userSchema.virtual("hardware", {
-  ref: "Hardware",
+userSchema.virtual("user", {
+  ref: "Product",
   localField: "_id",
   foreignField: "user",
   justOne: false,

@@ -5,7 +5,6 @@ const config = require("../config");
 const { verify } = require("jsonwebtoken");
 const { createTokens, validateToken } = require("../JWT");
 
-/* GET users listing. */
 router.get("/", function (req, res, next) {
   res.send("respond with a resource");
 });
@@ -13,11 +12,9 @@ router.get("/", function (req, res, next) {
 module.exports = router;
 
 router.put("/edit-product/:id", validateToken, (req, res) => {
-  //sciagam tokena z headera
   const accessToken = req.headers["x-access-token"];
   const token = verify(accessToken, config.JWT_SECRET);
 
-  console.log("co leci z frontu??", req.body);
   const {
     _id,
     brand,
@@ -34,7 +31,7 @@ router.put("/edit-product/:id", validateToken, (req, res) => {
     final_expiration_date,
     product_price,
   } = req.body;
-  //jesli doi number jest czymkolwiek wtedy
+
   if (!_id) {
     res.json(400, { message: "Błąd brak id artykułu?" });
   }
@@ -72,7 +69,6 @@ router.put("/edit-product/:id", validateToken, (req, res) => {
   );
   editProduct.exec((err, editProduct) => {
     if (err) {
-      console.log("błąd serwera", err);
       res.json(400, { message: "Błąd serwera" });
     }
     if (!editProduct) {
@@ -81,7 +77,6 @@ router.put("/edit-product/:id", validateToken, (req, res) => {
     res.json(200, { message: "Produkt został pomyślnie zedytowany" });
   });
 });
-//++
 
 const statusHelper = (starting_date, ending_date) => {
   if (!starting_date && !ending_date) {
@@ -94,11 +89,9 @@ const statusHelper = (starting_date, ending_date) => {
 };
 
 router.post("/add-product", validateToken, (req, res) => {
-  //sciagam tokena z headera
   const accessToken = req.headers["x-access-token"];
   const token = verify(accessToken, config.JWT_SECRET);
 
-  console.log("bedzie dodane nowe produkty", token);
   const {
     brand,
     main_category,
@@ -126,7 +119,7 @@ router.post("/add-product", validateToken, (req, res) => {
   }
 
   const newStatus = statusHelper(starting_date, ending_date);
-  console.log("status", newStatus);
+
   const newProduct = new Product({
     brand: brand,
     main_category: main_category,
@@ -148,22 +141,17 @@ router.post("/add-product", validateToken, (req, res) => {
 
   newProduct.save((err) => {
     if (!err) {
-      console.log("Produkt zostal dodany pomyślnie");
       res.json(200, { message: "Produkt zostal dodany pomyślnie" });
     } else {
-      console.log("error:", err);
       res.json(400, err);
     }
   });
 });
 
-//++
-
 router.get("/get-product-list", validateToken, (req, res) => {
-  console.log("pobieram liste produktow", req?.query || "brak query");
   const accessToken = req.headers["x-access-token"];
   const token = verify(accessToken, config.JWT_SECRET);
-  // 'name.last': 'Ghost',
+
   const {
     brand,
     main_category,
@@ -171,11 +159,6 @@ router.get("/get-product-list", validateToken, (req, res) => {
     product_short_name,
     status,
   } = req.query;
-
-  // productList = Product.find({
-  //   user: token.id,
-  //   $brand: { $search: `"${brand}"` },
-  // });
 
   productList = Product.find({
     $and: [
@@ -221,10 +204,7 @@ router.get("/get-product-list", validateToken, (req, res) => {
   });
 });
 
-//POBIERZ JEDEN ARTYKUL
 router.get("/get-product/:id", validateToken, (req, res) => {
-  // const accessToken = req.headers["x-access-token"];
-  // const token = verify(accessToken, config.JWT_SECRET);
   const { id } = req.params;
 
   const product = Product.findOne({
@@ -244,15 +224,12 @@ router.delete("/delete-product/:id", validateToken, (req, res) => {
 
   const { id } = req.params;
 
-  console.log("błąd 1");
   const product = Product.findByIdAndDelete({
     _id: id,
   }).then((product) => {
     if (!product) {
-      console.log("błąd 2");
       res.json(400, { message: "Brak produktu do usuniecia" });
     } else {
-      console.log("błąd 3");
       res.json(200, { message: "Produkt został pomyślnie usunięty" });
     }
   });

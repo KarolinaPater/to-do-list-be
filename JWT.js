@@ -11,11 +11,9 @@ const createTokens = (user) => {
   return accessToken;
 };
 const validateToken = (req, res, next) => {
-  console.log("waliduje tokena");
   const accessToken = req.headers["x-access-token"];
 
   if (!accessToken) {
-    console.log("niematokena");
     return res
       .status(400)
       .json({ error: "Uzytkownik nie posiada autoryzacji" });
@@ -23,11 +21,9 @@ const validateToken = (req, res, next) => {
   try {
     const validToken = verify(accessToken, config.JWT_SECRET);
     if (validToken) {
-      console.log("tokenok");
       return next();
     }
   } catch (err) {
-    console.log("jakis error");
     return res
       .status(400)
       .json({ error: "Uzytkownik nie posiada autoryzacji" });

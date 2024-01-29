@@ -8,16 +8,13 @@ const { createTokens, validateToken } = require("../JWT");
 const User = require("../models/user");
 
 router.get("/my-product", (req, res) => {
-  console.log("pobiera produkty");
   productList = Product.find();
   productList.sort({ date: -1 });
   productList.exec((err, productList) => {
     if (err) {
-      console.log("error skad blad", err);
       res.json(400, { err });
     }
     if (!productListList) {
-      console.log("brak produktów");
       res.json(200, { message: "Brak produktów" });
     }
     res.json(200, { productListList });
@@ -26,7 +23,7 @@ router.get("/my-product", (req, res) => {
 
 router.get("/get-product/:id", (req, res) => {
   const { id } = req.params;
-  console.log("pobieram 1 produkt po id:", id);
+
   const product = Product.findOne({
     _id: id,
   }).then((product) => {
@@ -72,7 +69,6 @@ router.post("/register", (req, res) => {
 });
 
 router.post("/login", (req, res) => {
-  console.log("hello world", req.body);
   const { email, password } = req.body;
   const hashpassword = sha512(password);
   if (!email || !password)
@@ -104,7 +100,6 @@ router.post("/logout", validateToken, (req, res) => {
 });
 
 router.post("/session", validateToken, (req, res) => {
-  console.log("sprawdzam sesje");
   const accessToken = req.headers["x-access-token"];
   const token = verify(accessToken, config.JWT_SECRET);
   const user = User.findOne({
