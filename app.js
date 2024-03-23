@@ -11,8 +11,8 @@ const db = mongoose.connection;
 db.on("error", console.error.bind(console, "connection error:"));
 
 const indexRouter = require("./routes/index");
-const usersRouter = require("./routes/users");
-const adminRouter = require("./routes/admin");
+// const usersRouter = require("./routes/users");
+const taskRouter = require("./routes/task");
 
 const app = express();
 
@@ -37,8 +37,8 @@ app.use(function (req, res, next) {
 });
 
 app.use("/", indexRouter);
-app.use("/users", usersRouter);
-app.use("/admin", adminRouter);
+// app.use("/users", usersRouter);
+app.use("/task", taskRouter);
 
 app.use(function (req, res, next) {
   next(createError(404));

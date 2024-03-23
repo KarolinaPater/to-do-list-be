@@ -2,56 +2,65 @@ const express = require("express");
 const router = express.Router();
 const sha512 = require("js-sha512");
 const config = require("../config");
-const Product = require("../models/product");
+// const Product = require("../models/product");
 const { verify } = require("jsonwebtoken");
 const { createTokens, validateToken } = require("../JWT");
 const User = require("../models/user");
 
-router.get("/my-product", (req, res) => {
-  productList = Product.find();
-  productList.sort({ date: -1 });
-  productList.exec((err, productList) => {
-    if (err) {
-      res.json(400, { err });
-    }
-    if (!productListList) {
-      res.json(200, { message: "Brak produktów" });
-    }
-    res.json(200, { productListList });
-  });
+// router.get("/my-product", (req, res) => {
+//   productList = Product.find();
+//   productList.sort({ date: -1 });
+//   productList.exec((err, productList) => {
+//     if (err) {
+//       res.json(400, { err });
+//     }
+//     if (!productListList) {
+//       res.json(200, { message: "Brak produktów" });
+//     }
+//     res.json(200, { productListList });
+//   });
+// });
+router.get("/", (req, res) => {
+  res.json(200, { message: "server responding" });
 });
+// router.get("/get-product/:id", (req, res) => {
+//   const { id } = req.params;
 
-router.get("/get-product/:id", (req, res) => {
-  const { id } = req.params;
-
-  const product = Product.findOne({
-    _id: id,
-  }).then((product) => {
-    if (!product) {
-      res.json(400, { message: "Error Brak produktu" });
-    } else {
-      res.json(200, { product });
-    }
-  });
-});
+//   const product = Product.findOne({
+//     _id: id,
+//   }).then((product) => {
+//     if (!product) {
+//       res.json(400, { message: "Error Brak produktu" });
+//     } else {
+//       res.json(200, { product });
+//     }
+//   });
+// });
 
 router.post("/register", (req, res) => {
-  const { name, email, password } = req.body;
+  const { email, firstName, sex, password, confirmPassword, rules } = req.body;
 
-  if (!name || !email || !password) {
+  if (!email || !password || !confirmPassword || !rules || !sex || !firstName) {
     res.json(400, { message: "Proszę uzupełnić wymagane pola" });
   }
   if (password.length < 6)
     res.json(400, { message: "Hasło musi się składać z minimum 5 znaków" });
+
+  if (password !== confirmPassword)
+    res.json(400, { message: "Hasła się różnią" });
+
   if (email.length > 30)
     res.json(400, { message: "Email może zawierać maksymalnie 30 znaków" });
+
+  if (!rules) res.json(400, { message: "Zgody są wymagane" });
 
   User.findOne({ email: email }).then((user) => {
     if (user) {
       res.json(400, { message: "Ten email jest już w użyciu." });
     } else {
       const newUser = new User({
-        name,
+        firstName,
+        sex,
         email: email.toLowerCase(),
         password,
       });
@@ -83,12 +92,12 @@ router.post("/login", (req, res) => {
       const accessToken = createTokens(user);
       res.json(200, {
         message: "Zostałeś prawidłowo zalogowany",
-        is_logged: true,
+        isLogged: true,
         accessToken,
         user: {
-          name: user.name,
+          firstName: user.firstName,
           email: user.email,
-          role: user.role,
+          sex: user.sex,
         },
       });
     }
@@ -112,12 +121,12 @@ router.post("/session", validateToken, (req, res) => {
       const accessToken = createTokens(user);
       res.json(200, {
         message: "sesja odswiezona",
-        is_logged: true,
+        isLogged: true,
         accessToken,
         user: {
-          name: user.name,
+          firstName: user.firstName,
           email: user.email,
-          role: user.role,
+          sex: user.sex,
         },
       });
     }

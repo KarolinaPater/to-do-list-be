@@ -1,12 +1,15 @@
 const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 
-const userSchema = new Schema({
-  name: {
+const userTaskSchema = new Schema({
+  firstName: {
     type: String,
     required: true,
   },
-
+  sex: {
+    type: String,
+    require: true,
+  },
   email: {
     type: String,
     require: true,
@@ -14,11 +17,6 @@ const userSchema = new Schema({
   password: {
     type: String,
     require: true,
-  },
-
-  role: {
-    type: String,
-    default: "user",
   },
   creation_date: {
     type: Date,
@@ -30,11 +28,11 @@ const userSchema = new Schema({
   },
 });
 
-userSchema.virtual("user", {
-  ref: "Product",
-  localField: "_id",
-  foreignField: "user",
-  justOne: false,
-});
+// userSchema.virtual("user", {
+//   ref: "Task",
+//   localField: "_id",
+//   foreignField: "user",
+//   justOne: false,
+// });
 
-module.exports = mongoose.model("User", userSchema);
+module.exports = mongoose.model("UserTask", userTaskSchema);
