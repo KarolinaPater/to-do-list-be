@@ -4,7 +4,7 @@ const { sign, verify } = require("jsonwebtoken");
 
 const createTokens = (user) => {
   const accessToken = sign(
-    { email: user.email, id: user.id, role: user.role },
+    { email: user.email, id: user.id },
     config.JWT_SECRET,
     { expiresIn: "6h" }
   );

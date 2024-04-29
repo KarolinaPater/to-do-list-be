@@ -28,11 +28,4 @@ const userTaskSchema = new Schema({
   },
 });
 
-// userSchema.virtual("user", {
-//   ref: "Task",
-//   localField: "_id",
-//   foreignField: "user",
-//   justOne: false,
-// });
-
 module.exports = mongoose.model("UserTask", userTaskSchema);

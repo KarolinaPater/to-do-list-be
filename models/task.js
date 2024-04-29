@@ -6,8 +6,12 @@ const taskSchema = new Schema({
     required: true,
   },
   done: {
-    type: String,
+    type: Boolean,
     required: false,
+  },
+  user: {
+    type: String,
+    required: true,
   },
 });
 
